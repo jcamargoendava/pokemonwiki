@@ -4,9 +4,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	pokemonService "github.com/jcamargoendava/pokemonwiki/services"
 )
 
-func GetAllPokemon(c *gin.Context) {
-	pokemons := "Charmander"
-	c.JSON(http.StatusOK, gin.H{"data": pokemons})
+func GetPokemons(c *gin.Context) {
+	pokemonsFound := pokemonService.RetrieveAllPokemons()
+	c.JSON(http.StatusOK, gin.H{"data": pokemonsFound})
 }

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	pokemon "github.com/jcamargoendava/pokemonwiki/controllers"
+	pokemonController "github.com/jcamargoendava/pokemonwiki/controllers"
 )
 
 func StartGin() {
@@ -14,7 +14,7 @@ func StartGin() {
 		api.GET("are-you-alive", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"status": "running"})
 		})
-		api.GET("/pokemons", pokemon.GetAllPokemon)
+		api.GET("/pokemons", pokemonController.GetPokemons)
 	}
 	router.NoRoute(func(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
