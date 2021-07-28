@@ -1,31 +1,33 @@
 package services
 
 import (
+	"context"
 	"fmt"
+	"strconv"
 
 	pokemonModel "github.com/jcamargoendava/pokemonwiki/models"
-	"github.com/kamva/mgm/v3"
 	"github.com/mtslzr/pokeapi-go"
 )
 
-type Pokemon struct {
-	ID       int
-	Name     string
-	Category string
-	Img      string
-	Gender   string
+type PokemonRepository interface {
+	SavePokemon(ctx context.Context, pkModel *pokemonModel.Pokemon) (error, error)
+	// GetPokemon(ctx context.Context, id string) (*pokemonModel.Pokemon, error)
+	// GetPokemons(ctx context.Context) ([]*pokemonModel.Pokemon, error)
 }
 
-func SavePokemon(name, img string) *pokemonModel.Pokemon {
-	return &pokemonModel.Pokemon{
-		Name: name,
-		Img:  img,
+type Pokemon struct {
+	Repo PokemonRepository
+}
+
+func NewPokemon(repo PokemonRepository) *Pokemon {
+	return &Pokemon{
+		Repo: repo,
 	}
 }
 
-func RetrieveAllPokemons() []Pokemon {
+func (p *Pokemon) RetrieveAllPokemons(ctx context.Context) []pokemonModel.Pokemon {
 	pokemonsFound, err := pokeapi.Resource("pokemon")
-	var pokemons = []Pokemon{}
+	var pokemons = []pokemonModel.Pokemon{}
 	if err != nil {
 		fmt.Errorf("Error trying to get pokemons")
 	}
@@ -34,12 +36,13 @@ func RetrieveAllPokemons() []Pokemon {
 		if err != nil {
 			fmt.Errorf("Error trying to get pokemon %s", pokemonFound.Name)
 		}
-		pokemon := Pokemon{ID: pkmn.ID, Name: pkmn.Name, Category: "", Img: pkmn.Sprites.FrontDefault, Gender: ""}
+		fmt.Print(pkmn)
+		pokemon := pokemonModel.Pokemon{
+			ID:   strconv.Itoa(pkmn.ID),
+			Name: pkmn.Name,
+			Img:  pkmn.Sprites.FrontDefault,
+		}
 		pokemons = append(pokemons, pokemon)
 	}
-	pkmModel := pokemonModel.NewPokemon("test", "img.png")
-	mgm.Coll(pkmModel).Create(pkmModel)
-
-	// SavePokemon("test", "img.png")
 	return pokemons
 }

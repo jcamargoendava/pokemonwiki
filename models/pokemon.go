@@ -1,12 +1,13 @@
 package models
 
-import "github.com/kamva/mgm/v3"
+import "time"
 
 type Pokemon struct {
-	mgm.DefaultModel `bson:",inline"`
-
-	Name string `json:"name" bson:"name"`
-	Img  string `json:"img" bson:"img"`
+	ID        string    `json:"id"`
+	Name      string    `json:"name" bson:"name"`
+	Img       string    `json:"img" bson:"img"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 }
 
 func NewPokemon(name string, img string) *Pokemon {
