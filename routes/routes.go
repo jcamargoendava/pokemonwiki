@@ -28,7 +28,7 @@ func StartGin(ctx context.Context, db *mongo.Database) {
 		api.GET("/pokemons", pokemonController.GetPokemons)
 		api.GET("/master/:id", pokemonController.GetMaster)
 		api.POST("/master", pokemonController.CreateMaster)
-		api.PATCH("/master/:id", pokemonController.UpdateMaster)
+		api.PUT("/master/:id", pokemonController.UpdateMaster)
 		api.DELETE("/master/:id", pokemonController.DeleteMaster)
 	}
 	router.NoRoute(func(c *gin.Context) {

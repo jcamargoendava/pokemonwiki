@@ -43,14 +43,19 @@ func (m *Master) SaveMaster(ctx context.Context, mModel *masterModel.Master) (*m
 	return insertedMaster, nil
 }
 
-func (m *Master) UpdateMaster(ctx context.Context, id string, mModel *masterModel.Master) (*mongo.UpdateResult, error) {
+func (m *Master) UpdateMaster(ctx context.Context, id string, mModel *masterModel.Master) (*masterModel.Master, error) {
+	var masterFound masterModel.Master
 	collection := m.DB.Collection(m.CollectionName)
 	objID, _ := primitive.ObjectIDFromHex(id)
-	masterFound, err := collection.UpdateByID(ctx, bson.M{"_id": objID}, mModel)
+	err := collection.FindOneAndUpdate(ctx, bson.M{"_id": objID}, bson.D{{"$set", bson.D{
+		{"name", mModel.Name},
+		{"gender", mModel.Gender},
+		{"age", mModel.Age},
+		{"pokemons", mModel.Pokemons}}}}).Decode(&masterFound)
 	if err != nil {
 		return nil, fmt.Errorf("Error trying to get master")
 	}
-	return masterFound, nil
+	return &masterFound, nil
 }
 
 func (m *Master) DeleteMaster(ctx context.Context, id string) error {

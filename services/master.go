@@ -10,7 +10,7 @@ import (
 type MasterRepository interface {
 	GetMaster(ctx context.Context, id string) (masterModel.Master, error)
 	SaveMaster(ctx context.Context, mModel *masterModel.Master) (*mongo.InsertOneResult, error)
-	UpdateMaster(ctx context.Context, id string, mModel *masterModel.Master) (*mongo.UpdateResult, error)
+	UpdateMaster(ctx context.Context, id string, mModel *masterModel.Master) (*masterModel.Master, error)
 	DeleteMaster(ctx context.Context, id string) error
 }
 
@@ -34,7 +34,7 @@ func (m *Master) SaveMaster(ctx context.Context, master *masterModel.Master) (*m
 	return createdMaster, err
 }
 
-func (m *Master) UpdateMaster(ctx context.Context, id string, master *masterModel.Master) (*mongo.UpdateResult, error) {
+func (m *Master) UpdateMaster(ctx context.Context, id string, master *masterModel.Master) (*masterModel.Master, error) {
 	updatedMaster, err := m.Repo.UpdateMaster(ctx, id, master)
 	return updatedMaster, err
 }
