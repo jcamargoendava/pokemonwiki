@@ -1,13 +1,18 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Pokemon struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name" bson:"name"`
-	Img       string    `json:"img" bson:"img"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	ID        primitive.ObjectID `json:"id" bson:"_id"`
+	PokemonID int                `json:"pokemon_id" bson:"pokemon_id"`
+	Name      string             `json:"name" bson:"name"`
+	Img       string             `json:"img" bson:"img"`
+	CreatedAt time.Time          `json:"created_at"`
+	UpdatedAt time.Time          `json:"updated_at,omitempty"`
 }
 
 func NewPokemon(name string, img string) *Pokemon {

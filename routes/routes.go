@@ -26,6 +26,11 @@ func StartGin(ctx context.Context, db *mongo.Database) {
 			c.JSON(http.StatusOK, gin.H{"status": "running"})
 		})
 		api.GET("/pokemons", pokemonController.GetPokemons)
+		api.GET("/pokemon/:name", pokemonController.GetPokemon)
+		api.POST("/pokemon", pokemonController.CreatePokemon)
+		api.PUT("/pokemon/:id", pokemonController.UpdatePokemon)
+		api.DELETE("/pokemon/:id", pokemonController.DeletePokemon)
+
 		api.GET("/master/:id", pokemonController.GetMaster)
 		api.POST("/master", pokemonController.CreateMaster)
 		api.PUT("/master/:id", pokemonController.UpdateMaster)
