@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	pokemonModel "github.com/jcamargoendava/pokemonwiki/models"
@@ -96,8 +97,12 @@ func DeletePokemon(c *gin.Context) {
 func GetPokemons(c *gin.Context) {
 	db, _ := c.MustGet("databaseConn").(*mongo.Database)
 	ctx, _ := c.MustGet("ctx").(context.Context)
+	limit := c.Query("limit")
+	offset := c.Query("offset")
+	offsetInt, _ := strconv.Atoi(offset)
+	limitInt, _ := strconv.Atoi(limit)
 	pokemonRepo := repository.NewPokemon(db, "pokemon")
 	pokemonService := services.NewPokemon(pokemonRepo)
-	pokemonsFound := pokemonService.RetrieveAllPokemons(ctx)
+	pokemonsFound := pokemonService.RetrieveAllPokemons(ctx, offsetInt, limitInt)
 	c.JSON(http.StatusOK, gin.H{"data": pokemonsFound})
 }

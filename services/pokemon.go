@@ -3,9 +3,13 @@ package services
 import (
 	"context"
 	"fmt"
+	"math"
+	"sync"
+	"time"
 
 	pokemonModel "github.com/jcamargoendava/pokemonwiki/models"
 	"github.com/mtslzr/pokeapi-go"
+	"github.com/mtslzr/pokeapi-go/structs"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -46,23 +50,54 @@ func (p *Pokemon) DeletePokemon(ctx context.Context, id string) error {
 	return err
 }
 
-func (p *Pokemon) RetrieveAllPokemons(ctx context.Context) []pokemonModel.Pokemon {
-	pokemonsFound, err := pokeapi.Resource("pokemon")
+func (p *Pokemon) RetrieveAllPokemons(ctx context.Context, offset int, limit int) []pokemonModel.Pokemon {
+	ch := make(chan structs.Resource)
+	var wg sync.WaitGroup
+	start := time.Now()
+	loops := float64(limit) / float64(50)
+	goRoutines := int(math.Ceil(loops))
+	for i := 0; i < goRoutines; i++ {
+		wg.Add(1)
+		go GetPokemonRequest(offset, limit, ch, &wg)
+		offset = offset + limit
+	}
+
+	// close the channel in the background
+	go func() {
+		wg.Wait()
+		close(ch)
+		fmt.Println(time.Since(start))
+	}()
+	// read from channel as they come in until its closed
 	var pokemons = []pokemonModel.Pokemon{}
+	for pokemonsFound := range ch {
+		wg := sync.WaitGroup{}
+		for _, pokemonFound := range pokemonsFound.Results {
+			wg.Add(1)
+			go func(pokemonName string) {
+				pkmn, err := pokeapi.Pokemon(pokemonName)
+				if err != nil {
+					fmt.Errorf("Error trying to get pokemon %s", pokemonName)
+				}
+				pokemon := pokemonModel.Pokemon{
+					PokemonID: pkmn.ID,
+					Name:      pkmn.Name,
+					Img:       pkmn.Sprites.FrontDefault,
+				}
+				pokemons = append(pokemons, pokemon)
+				wg.Done()
+			}(pokemonFound.Name)
+		}
+		wg.Wait()
+	}
+	return pokemons
+}
+
+func GetPokemonRequest(offset, limit int, ch chan<- structs.Resource, wg *sync.WaitGroup) {
+	defer wg.Done()
+	pokemonsFound, err := pokeapi.Resource("pokemon", offset, limit)
 	if err != nil {
 		fmt.Errorf("Error trying to get pokemons")
 	}
-	for _, pokemonFound := range pokemonsFound.Results {
-		pkmn, err := pokeapi.Pokemon(pokemonFound.Name)
-		if err != nil {
-			fmt.Errorf("Error trying to get pokemon %s", pokemonFound.Name)
-		}
-		pokemon := pokemonModel.Pokemon{
-			PokemonID: pkmn.ID,
-			Name:      pkmn.Name,
-			Img:       pkmn.Sprites.FrontDefault,
-		}
-		pokemons = append(pokemons, pokemon)
-	}
-	return pokemons
+	ch <- pokemonsFound
 }
