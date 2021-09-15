@@ -11,13 +11,11 @@ import (
 	"github.com/jcamargoendava/pokemonwiki/repository"
 	"github.com/jcamargoendava/pokemonwiki/services"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func GetPokemon(c *gin.Context) {
-	db, _ := c.MustGet("databaseConn").(*mongo.Database)
 	ctx, _ := c.MustGet("ctx").(context.Context)
-	pokemonRepo := repository.NewPokemon(db, "pokemon")
+	pokemonRepo := repository.NewPokemon("pokemon")
 	pokemonService := services.NewPokemon(pokemonRepo)
 	pokemonName := c.Param("name")
 	if pokemonName == "" {
@@ -38,9 +36,8 @@ func CreatePokemon(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	db, _ := c.MustGet("databaseConn").(*mongo.Database)
 	ctx, _ := c.MustGet("ctx").(context.Context)
-	pokemonRepo := repository.NewPokemon(db, "pokemon")
+	pokemonRepo := repository.NewPokemon("pokemon")
 	pokemonService := services.NewPokemon(pokemonRepo)
 	pokemon.ID = primitive.NewObjectID()
 	createdPokemon, err := pokemonService.SavePokemon(ctx, &pokemon)
@@ -63,9 +60,8 @@ func UpdatePokemon(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "param id is required"})
 		return
 	}
-	db, _ := c.MustGet("databaseConn").(*mongo.Database)
 	ctx, _ := c.MustGet("ctx").(context.Context)
-	pokemonRepo := repository.NewPokemon(db, "pokemon")
+	pokemonRepo := repository.NewPokemon("pokemon")
 	pokemonService := services.NewPokemon(pokemonRepo)
 	foundPokemon, err := pokemonService.UpdatePokemon(ctx, id, &pokemon)
 	if err != nil {
@@ -82,9 +78,8 @@ func DeletePokemon(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "param id is required"})
 		return
 	}
-	db, _ := c.MustGet("databaseConn").(*mongo.Database)
 	ctx, _ := c.MustGet("ctx").(context.Context)
-	pokemonRepo := repository.NewPokemon(db, "pokemon")
+	pokemonRepo := repository.NewPokemon("pokemon")
 	pokemonService := services.NewPokemon(pokemonRepo)
 	if err := pokemonService.DeletePokemon(ctx, id); err != nil {
 		fmt.Errorf("Error trying to get a pokemon")
@@ -95,13 +90,12 @@ func DeletePokemon(c *gin.Context) {
 }
 
 func GetPokemons(c *gin.Context) {
-	db, _ := c.MustGet("databaseConn").(*mongo.Database)
 	ctx, _ := c.MustGet("ctx").(context.Context)
 	limit := c.Query("limit")
 	offset := c.Query("offset")
 	offsetInt, _ := strconv.Atoi(offset)
 	limitInt, _ := strconv.Atoi(limit)
-	pokemonRepo := repository.NewPokemon(db, "pokemon")
+	pokemonRepo := repository.NewPokemon("pokemon")
 	pokemonService := services.NewPokemon(pokemonRepo)
 	pokemonsFound := pokemonService.RetrieveAllPokemons(ctx, offsetInt, limitInt)
 	c.JSON(http.StatusOK, gin.H{"data": pokemonsFound})

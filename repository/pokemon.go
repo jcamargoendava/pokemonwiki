@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 
+	"github.com/jcamargoendava/pokemonwiki/database"
 	pokemonModel "github.com/jcamargoendava/pokemonwiki/models"
 	"github.com/mtslzr/pokeapi-go"
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,9 +16,8 @@ type Pokemon struct {
 	CollectionName string
 }
 
-func NewPokemon(db *mongo.Database, collectionName string) *Pokemon {
+func NewPokemon(collectionName string) *Pokemon {
 	return &Pokemon{
-		DB:             db,
 		CollectionName: collectionName,
 	}
 }
@@ -26,8 +26,10 @@ func (pk *Pokemon) GetPokemon(ctx context.Context, name string) (pokemonModel.Po
 	var pokemon pokemonModel.Pokemon
 	pokemonFound, err := pokeapi.Pokemon(name)
 	if err != nil {
-		collection := pk.DB.Collection(pk.CollectionName)
+		db, conn := database.NewConnection(ctx, "pokemon_database")
+		collection := db.Collection(pk.CollectionName)
 		errDB := collection.FindOne(ctx, bson.M{"name": name}).Decode(&pokemon)
+		conn.Close(ctx)
 		return pokemon, errDB
 	}
 	return pokemonModel.Pokemon{
@@ -38,25 +40,31 @@ func (pk *Pokemon) GetPokemon(ctx context.Context, name string) (pokemonModel.Po
 }
 
 func (pk *Pokemon) SavePokemon(ctx context.Context, pkModel *pokemonModel.Pokemon) (*mongo.InsertOneResult, error) {
-	collection := pk.DB.Collection(pk.CollectionName)
+	db, conn := database.NewConnection(ctx, "pokemon_database")
+	collection := db.Collection(pk.CollectionName)
 	insertedPokemon, err := collection.InsertOne(ctx, pkModel)
+	conn.Close(ctx)
 	return insertedPokemon, err
 }
 
 func (pk *Pokemon) UpdatePokemon(ctx context.Context, id string, pkModel *pokemonModel.Pokemon) (pokemonModel.Pokemon, error) {
+	db, conn := database.NewConnection(ctx, "pokemon_database")
 	var pokemon pokemonModel.Pokemon
-	collection := pk.DB.Collection(pk.CollectionName)
+	collection := db.Collection(pk.CollectionName)
 	objID, _ := primitive.ObjectIDFromHex(id)
 	err := collection.FindOneAndUpdate(ctx, bson.M{"_id": objID}, bson.D{{"$set", bson.D{
 		{"name", pkModel.Name},
 		{"img", pkModel.Img},
 	}}}).Decode(&pokemon)
+	conn.Close(ctx)
 	return pokemon, err
 }
 
 func (pk *Pokemon) DeletePokemon(ctx context.Context, id string) error {
-	collection := pk.DB.Collection(pk.CollectionName)
+	db, conn := database.NewConnection(ctx, "pokemon_database")
+	collection := db.Collection(pk.CollectionName)
 	objID, _ := primitive.ObjectIDFromHex(id)
 	_, err := collection.DeleteOne(ctx, bson.M{"_id": objID})
+	conn.Close(ctx)
 	return err
 }

@@ -6,20 +6,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 	pokemonController "github.com/jcamargoendava/pokemonwiki/controllers"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func ApiMiddleware(ctx context.Context, db *mongo.Database) gin.HandlerFunc {
+func ApiMiddleware(ctx context.Context) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Set("databaseConn", db)
+		// c.Set("databaseConn", db)
 		c.Set("ctx", ctx)
 		c.Next()
 	}
 }
 
-func StartGin(ctx context.Context, db *mongo.Database) {
+func StartGin(ctx context.Context) {
 	router := gin.Default()
-	router.Use(ApiMiddleware(ctx, db))
+	router.Use(ApiMiddleware(ctx))
 	api := router.Group("/api")
 	{
 		api.GET("are-you-alive", func(c *gin.Context) {

@@ -10,7 +10,6 @@ import (
 	"github.com/jcamargoendava/pokemonwiki/repository"
 	"github.com/jcamargoendava/pokemonwiki/services"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func GetMaster(c *gin.Context) {
@@ -19,9 +18,8 @@ func GetMaster(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "param id is required"})
 		return
 	}
-	db, _ := c.MustGet("databaseConn").(*mongo.Database)
 	ctx, _ := c.MustGet("ctx").(context.Context)
-	masterRepo := repository.NewMaster(db, "master")
+	masterRepo := repository.NewMaster("master")
 	masterService := services.NewMaster(masterRepo)
 	foundMaster, err := masterService.GetMaster(ctx, id)
 	if err != nil {
@@ -38,9 +36,8 @@ func CreateMaster(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	db, _ := c.MustGet("databaseConn").(*mongo.Database)
 	ctx, _ := c.MustGet("ctx").(context.Context)
-	masterRepo := repository.NewMaster(db, "master")
+	masterRepo := repository.NewMaster("master")
 	masterService := services.NewMaster(masterRepo)
 	master.ID = primitive.NewObjectID()
 	createdMaster, err := masterService.SaveMaster(ctx, &master)
@@ -63,9 +60,8 @@ func UpdateMaster(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "param id is required"})
 		return
 	}
-	db, _ := c.MustGet("databaseConn").(*mongo.Database)
 	ctx, _ := c.MustGet("ctx").(context.Context)
-	masterRepo := repository.NewMaster(db, "master")
+	masterRepo := repository.NewMaster("master")
 	masterService := services.NewMaster(masterRepo)
 	foundMaster, err := masterService.UpdateMaster(ctx, id, &master)
 	if err != nil {
@@ -82,9 +78,8 @@ func DeleteMaster(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "param id is required"})
 		return
 	}
-	db, _ := c.MustGet("databaseConn").(*mongo.Database)
 	ctx, _ := c.MustGet("ctx").(context.Context)
-	masterRepo := repository.NewMaster(db, "master")
+	masterRepo := repository.NewMaster("master")
 	masterService := services.NewMaster(masterRepo)
 	if err := masterService.DeleteMaster(ctx, id); err != nil {
 		fmt.Errorf("Error trying to get a master")
