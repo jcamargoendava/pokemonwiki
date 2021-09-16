@@ -26,7 +26,10 @@ func (pk *Pokemon) GetPokemon(ctx context.Context, name string) (pokemonModel.Po
 	var pokemon pokemonModel.Pokemon
 	pokemonFound, err := pokeapi.Pokemon(name)
 	if err != nil {
-		db, conn := database.NewConnection(ctx, "pokemon_database")
+		db, conn, err := database.NewConnection(ctx, "pokemon_database")
+		if err != nil {
+			return pokemonModel.Pokemon{}, err
+		}
 		collection := db.Collection(pk.CollectionName)
 		errDB := collection.FindOne(ctx, bson.M{"name": name}).Decode(&pokemon)
 		conn.Close(ctx)
@@ -40,7 +43,10 @@ func (pk *Pokemon) GetPokemon(ctx context.Context, name string) (pokemonModel.Po
 }
 
 func (pk *Pokemon) SavePokemon(ctx context.Context, pkModel *pokemonModel.Pokemon) (*mongo.InsertOneResult, error) {
-	db, conn := database.NewConnection(ctx, "pokemon_database")
+	db, conn, err := database.NewConnection(ctx, "pokemon_database")
+	if err != nil {
+		return nil, err
+	}
 	collection := db.Collection(pk.CollectionName)
 	insertedPokemon, err := collection.InsertOne(ctx, pkModel)
 	conn.Close(ctx)
@@ -48,11 +54,14 @@ func (pk *Pokemon) SavePokemon(ctx context.Context, pkModel *pokemonModel.Pokemo
 }
 
 func (pk *Pokemon) UpdatePokemon(ctx context.Context, id string, pkModel *pokemonModel.Pokemon) (pokemonModel.Pokemon, error) {
-	db, conn := database.NewConnection(ctx, "pokemon_database")
+	db, conn, err := database.NewConnection(ctx, "pokemon_database")
+	if err != nil {
+		return pokemonModel.Pokemon{}, err
+	}
 	var pokemon pokemonModel.Pokemon
 	collection := db.Collection(pk.CollectionName)
 	objID, _ := primitive.ObjectIDFromHex(id)
-	err := collection.FindOneAndUpdate(ctx, bson.M{"_id": objID}, bson.D{{"$set", bson.D{
+	err = collection.FindOneAndUpdate(ctx, bson.M{"_id": objID}, bson.D{{"$set", bson.D{
 		{"name", pkModel.Name},
 		{"img", pkModel.Img},
 	}}}).Decode(&pokemon)
@@ -61,10 +70,13 @@ func (pk *Pokemon) UpdatePokemon(ctx context.Context, id string, pkModel *pokemo
 }
 
 func (pk *Pokemon) DeletePokemon(ctx context.Context, id string) error {
-	db, conn := database.NewConnection(ctx, "pokemon_database")
+	db, conn, err := database.NewConnection(ctx, "pokemon_database")
+	if err != nil {
+		return err
+	}
 	collection := db.Collection(pk.CollectionName)
 	objID, _ := primitive.ObjectIDFromHex(id)
-	_, err := collection.DeleteOne(ctx, bson.M{"_id": objID})
+	_, err = collection.DeleteOne(ctx, bson.M{"_id": objID})
 	conn.Close(ctx)
 	return err
 }

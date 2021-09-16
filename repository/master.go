@@ -24,10 +24,13 @@ func NewMaster(collectionName string) *Master {
 
 func (m *Master) GetMaster(ctx context.Context, id string) (masterModel.Master, error) {
 	var masterFound masterModel.Master
-	db, conn := database.NewConnection(ctx, "pokemon_database")
+	db, conn, err := database.NewConnection(ctx, "pokemon_database")
+	if err != nil {
+		return masterModel.Master{}, err
+	}
 	collection := db.Collection(m.CollectionName)
 	objID, _ := primitive.ObjectIDFromHex(id)
-	err := collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&masterFound)
+	err = collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&masterFound)
 	conn.Close(ctx)
 	if err != nil {
 		return masterModel.Master{}, fmt.Errorf("Error trying to get master")
@@ -36,7 +39,10 @@ func (m *Master) GetMaster(ctx context.Context, id string) (masterModel.Master, 
 }
 
 func (m *Master) SaveMaster(ctx context.Context, mModel *masterModel.Master) (*mongo.InsertOneResult, error) {
-	db, conn := database.NewConnection(ctx, "pokemon_database")
+	db, conn, err := database.NewConnection(ctx, "pokemon_database")
+	if err != nil {
+		return nil, err
+	}
 	collection := db.Collection(m.CollectionName)
 	insertedMaster, err := collection.InsertOne(ctx, mModel)
 	conn.Close(ctx)
@@ -48,11 +54,14 @@ func (m *Master) SaveMaster(ctx context.Context, mModel *masterModel.Master) (*m
 }
 
 func (m *Master) UpdateMaster(ctx context.Context, id string, mModel *masterModel.Master) (*masterModel.Master, error) {
-	db, conn := database.NewConnection(ctx, "pokemon_database")
+	db, conn, err := database.NewConnection(ctx, "pokemon_database")
+	if err != nil {
+		return nil, err
+	}
 	var masterFound masterModel.Master
 	collection := db.Collection(m.CollectionName)
 	objID, _ := primitive.ObjectIDFromHex(id)
-	err := collection.FindOneAndUpdate(ctx, bson.M{"_id": objID}, bson.D{{"$set", bson.D{
+	err = collection.FindOneAndUpdate(ctx, bson.M{"_id": objID}, bson.D{{"$set", bson.D{
 		{"name", mModel.Name},
 		{"gender", mModel.Gender},
 		{"age", mModel.Age},
@@ -65,7 +74,10 @@ func (m *Master) UpdateMaster(ctx context.Context, id string, mModel *masterMode
 }
 
 func (m *Master) DeleteMaster(ctx context.Context, id string) error {
-	db, conn := database.NewConnection(ctx, "pokemon_database")
+	db, conn, err := database.NewConnection(ctx, "pokemon_database")
+	if err != nil {
+		return err
+	}
 	collection := db.Collection(m.CollectionName)
 	objID, _ := primitive.ObjectIDFromHex(id)
 	deletedMaster, err := collection.DeleteOne(ctx, bson.M{"_id": objID})
