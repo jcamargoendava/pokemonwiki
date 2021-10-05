@@ -47,7 +47,7 @@ func (m *Master) SaveMaster(ctx context.Context, mModel *masterModel.Master) (*m
 	insertedMaster, err := collection.InsertOne(ctx, mModel)
 	conn.Close(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("Error trying to insert")
+		return nil, fmt.Errorf("Error trying to insert", err)
 	}
 	fmt.Print(insertedMaster)
 	return insertedMaster, nil
