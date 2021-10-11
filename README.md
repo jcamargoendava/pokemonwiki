@@ -149,3 +149,13 @@ Since it's a POST request, it sends a request body composed of all the fields of
 Updates a master object that matches the id in the path
 - `DELETE` &ensp;*`api/master/:id`*  
 Deletes a master object that matches the id in the path
+
+
+## 🚢 **Docker Setup** ##
+
+Run the docker file:  
+`docker-compose build`  
+If you want to use a local instance of the mongo database:  
+`docker compose up -d mongo`  
+Start the service:  
+`docker-compose up pokemon_wiki`
