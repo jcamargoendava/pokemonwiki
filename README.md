@@ -2,7 +2,7 @@
 
 ## 😎 **Description**
 
-This is a REST API that can do all the CRUD operations like create, update, delete or display pokemons and their masters. These are JSON objects that are saved in a database hosted on a mongoDB Atlas cluster.
+This REST API was created using the Gin Framework and it can do CRUD operations like create, update, delete or display pokemons and their masters. These are JSON objects that are saved in a database hosted on a mongoDB Atlas cluster.
 
 
 ## 👨‍🏫 **Quick setup and test**
@@ -50,7 +50,7 @@ If everything works well, you should receive back a **200** successful message s
 
 
 ## 🗄️ **Project Structure** ##
-The project code is divided into 6 main folders:
+The project code is divided into 7 main folders:
 ### **Controllers** ###
 This is where you have the main logic of the project.
 All requests go through the functions included in this package.
@@ -94,6 +94,9 @@ Package responsible for setting up all the main endpoints of the application
 
 ### **Services** ###
 Package responsible with storing most of the application's logic
+
+### **DTO** ###
+The dto package provides data containers to transfer information between the server and the database. It's used mainly for making the swagger more accessible.
 
 ### **Main.go file** ###
 It's the main entry point to the entire application

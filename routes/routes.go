@@ -1,46 +1,30 @@
-// @title Swagger Example API
+// @title Pokemon API Swagger
 // @version 1.0
-// @description This is a sample server celler server.
-// @termsOfService http://swagger.io/terms/
-
-// @contact.name API Support
-// @contact.url http://www.swagger.io/support
-// @contact.email support@swagger.io
-
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-
+// @description This is a REST API that can do all the CRUD operations like create, update, delete or display pokemons and their masters. These are JSON objects that are saved in a database hosted on a mongoDB Atlas cluster.
 // @host localhost:8081
-// @BasePath /api/v1
+// @BasePath /api/
 // @query.collection.format multi
-
 // @securityDefinitions.basic BasicAuth
-
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
-
 // @securitydefinitions.oauth2.application OAuth2Application
 // @tokenUrl https://example.com/oauth/token
 // @scope.write Grants write access
 // @scope.admin Grants read and write access to administrative information
-
 // @securitydefinitions.oauth2.implicit OAuth2Implicit
 // @authorizationurl https://example.com/oauth/authorize
 // @scope.write Grants write access
 // @scope.admin Grants read and write access to administrative information
-
 // @securitydefinitions.oauth2.password OAuth2Password
 // @tokenUrl https://example.com/oauth/token
 // @scope.read Grants read access
 // @scope.write Grants write access
 // @scope.admin Grants read and write access to administrative information
-
 // @securitydefinitions.oauth2.accessCode OAuth2AccessCode
 // @tokenUrl https://example.com/oauth/token
 // @authorizationurl https://example.com/oauth/authorize
 // @scope.admin Grants read and write access to administrative information
-
 // @x-extension-openapi {"example": "value on a json format"}
 package routes
 
@@ -48,12 +32,15 @@ import (
 	"context"
 	"net/http"
 
+	pokemonController "github.com/jcamargoendava/pokemonwiki/controllers"
+
 	swaggerFiles "github.com/swaggo/files"     // swagger embed files
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
-	// "github.com/jcamargoendava/pokemonwiki/docs"
+
+	docs "github.com/jcamargoendava/pokemonwiki/docs"
+	// "../docs"
 
 	"github.com/gin-gonic/gin"
-	pokemonController "github.com/jcamargoendava/pokemonwiki/controllers"
 )
 
 func ApiMiddleware(ctx context.Context) gin.HandlerFunc {
@@ -65,28 +52,38 @@ func ApiMiddleware(ctx context.Context) gin.HandlerFunc {
 }
 
 func StartGin(ctx context.Context) {
+
+	// programmatically set swagger info
+	docs.SwaggerInfo.Title = "Pokemon API Swagger"
+	docs.SwaggerInfo.Schemes = []string{"http", "https"}
+
 	router := gin.Default()
 	router.Use(ApiMiddleware(ctx))
-	// api := router.Group("/api")
 
-	router.GET("are-you-alive", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "running"})
-	})
-	router.GET("/pokemons", pokemonController.GetPokemons)
-	router.GET("/pokemon/:name", pokemonController.GetPokemon)
-	router.POST("/pokemon", pokemonController.CreatePokemon)
-	router.PUT("/pokemon/:id", pokemonController.UpdatePokemon)
-	router.DELETE("/pokemon/:id", pokemonController.DeletePokemon)
+	api := router.Group("/api")
+	{
+		api.GET("are-you-alive", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{"status": "running"})
+		})
+		api.GET("/pokemons", pokemonController.GetPokemons)
+		api.GET("/pokemon/:name", pokemonController.GetPokemon)
+		api.POST("/pokemon", pokemonController.CreatePokemon)
+		api.PUT("/pokemon/:id", pokemonController.UpdatePokemon)
+		api.DELETE("/pokemon/:id", pokemonController.DeletePokemon)
 
-	router.GET("/master/:id", pokemonController.GetMaster)
-	router.POST("/master", pokemonController.CreateMaster)
-	router.PUT("/master/:id", pokemonController.UpdateMaster)
-	router.DELETE("/master/:id", pokemonController.DeleteMaster)
+		// api.GET("/masters", pokemonController.GetMasters)
+		api.GET("/master/:id", pokemonController.GetMaster)
+		api.POST("/master", pokemonController.CreateMaster)
+		api.PUT("/master/:id", pokemonController.UpdateMaster)
+		api.DELETE("/master/:id", pokemonController.DeleteMaster)
+	}
 
+	// use ginSwagger middleware to serve the API docs
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	router.NoRoute(func(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 	})
 	router.Run(":8081")
+
 }

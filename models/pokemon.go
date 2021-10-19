@@ -13,6 +13,7 @@ type Pokemon struct {
 	Img       string             `json:"img" bson:"img"`
 	CreatedAt time.Time          `json:"created_at"`
 	UpdatedAt time.Time          `json:"updated_at,omitempty"`
+	// Master    Master             `json:"master"`
 }
 
 func NewPokemon(name string, img string) *Pokemon {

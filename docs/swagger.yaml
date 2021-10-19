@@ -1,18 +1,320 @@
-basePath: /api/v1
-host: localhost:8080
+basePath: /api/
+definitions:
+  dto.Response_200:
+    properties:
+      data:
+        type: string
+    type: object
+  dto.Response_200_get_pokemons:
+    properties:
+      data:
+        items:
+          properties:
+            data:
+              type: string
+          type: object
+        type: array
+    type: object
+  dto.Response_500:
+    properties:
+      error:
+        type: string
+    type: object
+  dto.master_body:
+    properties:
+      age:
+        type: string
+      gender:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      pokemons:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.pokemon_body:
+    properties:
+      img:
+        type: string
+      name:
+        type: string
+      pokemonID:
+        type: integer
+    type: object
+  models.Master:
+    properties:
+      age:
+        type: string
+      created_at:
+        type: string
+      gender:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      pokemons:
+        items:
+          type: string
+        type: array
+      updated_at:
+        type: string
+    type: object
+  models.Pokemon:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      img:
+        type: string
+      name:
+        type: string
+      pokemon_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+host: localhost:8081
 info:
-  contact:
-    email: support@swagger.io
-    name: API Support
-    url: http://www.swagger.io/support
-  description: This is a sample server celler server.
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: http://swagger.io/terms/
-  title: Swagger Example API
+  contact: {}
+  description: This is a REST API that can do all the CRUD operations like create,
+    update, delete or display pokemons and their masters. These are JSON objects that
+    are saved in a database hosted on a mongoDB Atlas cluster.
+  title: Pokemon API Swagger
   version: "1.0"
-paths: {}
+paths:
+  /master:
+    post:
+      consumes:
+      - application/json
+      description: Create a new Master based on the information in the body of the
+        post request
+      parameters:
+      - description: Request Body
+        in: body
+        name: Body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.master_body'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Master'
+        "404":
+          description: not found
+        "500":
+          description: Internal Server Error
+      tags:
+      - master
+  /master/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a Master based on the id it finds in the path parameter
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Master'
+        "400":
+          description: not found
+        "404":
+          description: not found
+        "500":
+          description: Internal Server Error
+      tags:
+      - master
+    get:
+      consumes:
+      - application/json
+      description: Gets a Master using the id from the path parameter
+      parameters:
+      - description: Master ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Master'
+        "404":
+          description: not found
+        "500":
+          description: Internal Server Error
+      tags:
+      - master
+    put:
+      consumes:
+      - application/json
+      description: Updates a Master based on the id found in the path parameter with
+        the information found in the body of the put request
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: Body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.master_body'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Master'
+        "404":
+          description: not found
+        "500":
+          description: Internal Server Error
+      tags:
+      - master
+  /pokemon/:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new Pokemon based on the information in the body of the
+        post request
+      parameters:
+      - description: Request Body
+        in: body
+        name: Body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.pokemon_body'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response_200'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Response_500'
+      tags:
+      - pokemon
+  /pokemon/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Updates a Pokemon based on the id found in the path parameter with
+        the information found in body of the put request
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: Body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.pokemon_body'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Pokemon'
+        "500":
+          description: Internal Server Error
+      tags:
+      - pokemon
+  /pokemon/{name}:
+    get:
+      consumes:
+      - application/json
+      description: Gets a Pokemon using the name from the path parameter
+      parameters:
+      - description: name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Pokemon'
+        "404":
+          description: not found
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Response_500'
+      tags:
+      - pokemon
+  /pokemon/id:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a Pokemon based on the id it finds in the path parameter
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response_200'
+        "404":
+          description: not found
+        "500":
+          description: Internal Server Error
+      tags:
+      - pokemon
+  /pokemons/:
+    get:
+      consumes:
+      - application/json
+      description: Returns a list of all the Pokemons inside the mongoDB database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response_200_get_pokemons'
+        "404":
+          description: not found
+        "500":
+          description: Internal Server Error
+      tags:
+      - pokemon
 securityDefinitions:
   ApiKeyAuth:
     in: header
@@ -27,6 +329,7 @@ securityDefinitions:
       admin: ' Grants read and write access to administrative information'
     tokenUrl: https://example.com/oauth/token
     type: oauth2
+    x-extension-openapi: '{"example": "value on a json format"}'
   OAuth2Application:
     flow: application
     scopes:
@@ -50,5 +353,3 @@ securityDefinitions:
     tokenUrl: https://example.com/oauth/token
     type: oauth2
 swagger: "2.0"
-x-extension-openapi:
-  example: value on a json format
